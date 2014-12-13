@@ -154,24 +154,6 @@ func list_files(w http.ResponseWriter, r *http.Request) {
 	<script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
 	<script type="text/javascript">
 		$(function() {
-			$('#restart').click(function() {
-				$.get('/die');
-
-				function reloadIfUp() {
-					$.ajax({
-						url: '/test',
-						success: function() {
-							location.reload();
-						},
-						error: function() {
-							setTimeout(reloadIfUp, 100);
-						}
-					})
-				}
-
-				setTimeout(reloadIfUp, 300);
-			});
-
 			$('ul ul').hide();
 			$('.folder').click(function() {
 				var $children = $(this).parent().children('ul');
@@ -211,8 +193,7 @@ func list_files(w http.ResponseWriter, r *http.Request) {
 		});
 	</script>
 </head>
-<body>
-	<a href="javascript:void(0);" id="restart">Restart...</a><br /><br />`)
+<body>`)
 	_print_dir_html(w, ROOT_PATH, "    ")
 	fmt.Fprint(w, "</body>\n</html>")
 }
@@ -231,14 +212,6 @@ func media_info(w http.ResponseWriter, r *http.Request) {
 	w.Write(info)
 }
 
-// The purpose of this function is to exit the process, so I can run `watch` to automatically restart the process to see new changes.
-func die(w http.ResponseWriter, r *http.Request) {
-	defer os.Exit(0)
-}
-
-// This is used by JS after calling /die, to test when the server is back up
-func test(w http.ResponseWriter, r *http.Request) {}
-
 func init() {
 	MEDIA_EXTS = make_string_set("mp4", "avi", "mkv")
 
@@ -253,8 +226,6 @@ func init() {
 func main() {
 	http.Handle("/", http.HandlerFunc(list_files))
 	http.Handle("/info", http.HandlerFunc(media_info))
-	http.Handle("/die", http.HandlerFunc(die))
-	http.Handle("/test", http.HandlerFunc(test))
 
 	log.Fatal(http.ListenAndServe(":7000", nil))
 }
